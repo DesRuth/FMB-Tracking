@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 
@@ -158,6 +159,12 @@ public class DriverHomeActivity extends AppCompatActivity {
         super.onResume();
         if(checkMapServices()){
             if(mLocationPermissionGranted){
+
+            }
+            else{
+                getLocationPermission();
+            }
+            if(mLocationPermissionGranted){
                 //myFunc
                 Toast.makeText(this,"test Passed",Toast.LENGTH_SHORT).show();
             }
@@ -183,6 +190,13 @@ public class DriverHomeActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    //MapMenu
+    public void StartMapMenu(View view) {
+   Intent displayMap = new Intent(DriverHomeActivity.this,DisplayMapActivity.class);
+   startActivity(displayMap);
+
     }
 }
 
