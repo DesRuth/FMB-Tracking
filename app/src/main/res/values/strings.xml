@@ -5,4 +5,7 @@
     <string name="collection_users">Users</string>
     <string name="collection_drivers">Drivers</string>
 
+    <!--google maps!-->
+    <string name="Google_Maps_Api_Key">AIzaSyBotCZ8jIZ9uo5x-N4uYGEP62muPUkg0yg</string>
+
 </resources>
