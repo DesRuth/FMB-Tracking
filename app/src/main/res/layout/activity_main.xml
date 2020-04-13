@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/walpaper"
+
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="202dp"
+        android:fontFamily="@font/aclonica"
+        android:text="                                                                                   Are you Driver or Passanger?"
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_green_light"
+        android:textSize="36sp"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="55dp">
+
+    </TextView>
+
+    <Button
+        android:id="@+id/Passbutton"
+        android:layout_width="match_parent"
+        android:layout_height="106dp"
+        android:background="@color/common_google_signin_btn_text_dark_focused"
+        android:text="Passanger"
+        android:textColor="@color/common_google_signin_btn_text_dark_pressed"
+        android:textSize="30sp"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="415dp"
+        android:layout_marginBottom="30dp"/>
+
+    <Button
+        android:id="@+id/Drivbutton"
+        android:layout_width="match_parent"
+        android:layout_height="106dp"
+        android:background="@color/common_google_signin_btn_text_dark_focused"
+        android:text="Driver"
+        android:textColor="@color/common_google_signin_btn_text_dark_pressed"
+        android:textSize="30sp"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="415dp" />
+</LinearLayout>

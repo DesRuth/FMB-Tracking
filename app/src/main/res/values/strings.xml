@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">FMB-Tracking</string>
+
+    <!-- Firestore Strings -->
+    <string name="collection_users">Users</string>
+    <string name="collection_drivers">Drivers</string>
+
+</resources>
