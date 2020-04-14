@@ -16,7 +16,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.DisplayMapActivity"></activity>
+        <activity android:name=".ui.RecieveNoticeActivity"></activity>
+        <activity android:name=".ui.TimeTableActivity" />
+        <activity android:name=".ui.PassangerMapActivity" />
+        <activity android:name=".ui.AdminHomeActivity" />
+        <activity android:name=".ui.AdminLoginActivity" />
+        <activity android:name=".ui.DisplayMapActivity" />
         <activity android:name=".ui.DriverHomeActivity" />
         <activity android:name=".ui.PassangerHomeActivity" />
         <activity android:name=".ui.DriverRegisterActivity" />
