@@ -4,6 +4,9 @@
     <!-- Firestore Strings -->
     <string name="collection_users">Users</string>
     <string name="collection_drivers">Drivers</string>
+    <string name="collection_user_location">User Location</string>
+    <string name="collection_driver_location">Driver Location</string>
+
 
     <!--google maps!-->
     <string name="Google_Maps_Api_Key">AIzaSyBotCZ8jIZ9uo5x-N4uYGEP62muPUkg0yg</string>

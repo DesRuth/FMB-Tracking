@@ -32,9 +32,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.api.LogDescriptor;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.pkvv.fmb_tracking.MainActivity;
 import com.pkvv.fmb_tracking.R;
+import com.pkvv.fmb_tracking.models.DriverLocation;
+import com.pkvv.fmb_tracking.models.Drivers;
+import com.pkvv.fmb_tracking.models.User;
+import com.pkvv.fmb_tracking.models.UserLocation;
 
 import static com.pkvv.fmb_tracking.Constants.ERROR_DIALOG_REQUEST;
 import static com.pkvv.fmb_tracking.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
@@ -45,6 +52,8 @@ public class DriverHomeActivity extends AppCompatActivity {
     FirebaseAuth fAuth;
     private boolean mLocationPermissionGranted=false;
     private FusedLocationProviderClient mFusedLocationClient;
+    private DriverLocation mDriverLocation;
+    private FirebaseFirestore mdb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +63,42 @@ public class DriverHomeActivity extends AppCompatActivity {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         fAuth = FirebaseAuth.getInstance();
+        mdb = FirebaseFirestore.getInstance();
+
+    }
+
+    private void getdriversDetails(){
+        if(mDriverLocation==null){
+            mDriverLocation = new DriverLocation();
+            DocumentReference driversRef = mdb.collection(getString(R.string.collection_drivers))
+                    .document(FirebaseAuth.getInstance().getUid());
+            driversRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        Drivers drivers =task.getResult().toObject(Drivers.class);
+                        mDriverLocation.setDrivers(drivers);
+                        getLastKnownLocation();
+                    }
+                }
+            });
+
+        }
+    }
+
+    private void saveDriverLocation(){
+        if(mDriverLocation!=null){
+            DocumentReference locationRef =mdb.collection(getString(R.string.collection_driver_location))
+                    .document(FirebaseAuth.getInstance().getUid());
+            locationRef.set(mDriverLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+
+                    }
+                }
+            });
+        }
     }
 
     //get location
@@ -69,6 +114,9 @@ public class DriverHomeActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Location location = task.getResult();
                     GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+                    mDriverLocation.setGeo_point(geoPoint);
+                    mDriverLocation.setTimestamp(null);
+                    saveDriverLocation();
 
                 }
             }
@@ -121,7 +169,7 @@ public class DriverHomeActivity extends AppCompatActivity {
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-            getLastKnownLocation();
+            getdriversDetails();
 
         } else {
             ActivityCompat.requestPermissions(this,
@@ -175,7 +223,7 @@ public class DriverHomeActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ENABLE_GPS: {
                 if(mLocationPermissionGranted){
-                    getLastKnownLocation();
+                    getdriversDetails();
 
                 }
                 else{
@@ -191,7 +239,7 @@ public class DriverHomeActivity extends AppCompatActivity {
         super.onResume();
         if(checkMapServices()){
             if(mLocationPermissionGranted){
-                getLastKnownLocation();
+                getdriversDetails();
             }
             else{
                 getLocationPermission();

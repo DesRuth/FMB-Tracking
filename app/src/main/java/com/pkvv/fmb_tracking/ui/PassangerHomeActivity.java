@@ -25,11 +25,17 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.pkvv.fmb_tracking.R;
+import com.pkvv.fmb_tracking.models.User;
+import com.pkvv.fmb_tracking.models.UserLocation;
 
 import static com.pkvv.fmb_tracking.Constants.ERROR_DIALOG_REQUEST;
 import static com.pkvv.fmb_tracking.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
@@ -40,14 +46,54 @@ public class PassangerHomeActivity extends AppCompatActivity {
     FirebaseAuth fAuth;
     private boolean mLocationPermissionGranted = false;
     private FusedLocationProviderClient mFusedLocationClient;
+    private UserLocation mUserLocation;
+    private FirebaseFirestore mdb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passanger_home);
 
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         fAuth = FirebaseAuth.getInstance();
+        mdb = FirebaseFirestore.getInstance();
     }
+
+    private void getUserDetails(){
+   if(mUserLocation==null){
+    mUserLocation = new UserLocation();
+    DocumentReference userRef = mdb.collection(getString(R.string.collection_users))
+            .document(FirebaseAuth.getInstance().getUid());
+    userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        @Override
+        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+            if (task.isSuccessful()) {
+                User user =task.getResult().toObject(User.class);
+                mUserLocation.setUser(user);
+                getLastKnownLocation();
+            }
+        }
+    });
+
+    }
+    }
+
+    private void saveUserLocation(){
+        if(mUserLocation!=null){
+            DocumentReference locationRef =mdb.collection(getString(R.string.collection_user_location))
+                    .document(FirebaseAuth.getInstance().getUid());
+            locationRef.set(mUserLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+
+                    }
+                }
+            });
+        }
+    }
+
 //get location
 
     private void getLastKnownLocation() {
@@ -61,6 +107,9 @@ public class PassangerHomeActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Location location = task.getResult();
                     GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+                    mUserLocation.setGeo_point(geoPoint);
+                    mUserLocation.setTimestamp(null);
+                    saveUserLocation();
 
                 }
             }
@@ -112,7 +161,7 @@ public class PassangerHomeActivity extends AppCompatActivity {
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-            getLastKnownLocation();
+            getUserDetails();
 
         } else {
             ActivityCompat.requestPermissions(this,
@@ -165,7 +214,7 @@ public class PassangerHomeActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ENABLE_GPS: {
                 if (mLocationPermissionGranted) {
-                    getLastKnownLocation();
+                    getUserDetails();
 
                 } else {
                     getLocationPermission();
@@ -180,7 +229,7 @@ public class PassangerHomeActivity extends AppCompatActivity {
         super.onResume();
         if (checkMapServices()) {
             if (mLocationPermissionGranted) {
-                getLastKnownLocation();
+                getUserDetails();
             } else {
                 getLocationPermission();
             }
