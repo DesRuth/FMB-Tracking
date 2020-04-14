@@ -1,38 +1,41 @@
 package com.pkvv.fmb_tracking.models;
 
-public class Buses {
-    private Drivers drivers;
-    String BusNo ;
+import android.os.Parcelable;
 
-    public Buses(Drivers drivers, String busNo) {
-        this.drivers = drivers;
+import java.io.Serializable;
+
+public class Buses implements Serializable {
+
+    String BusNo  ;
+    String user_id;
+
+    public Buses(String busNo, String user_id) {
         BusNo = busNo;
+        this.user_id = user_id;
     }
     public Buses(){
 
-    }
-
-    public Drivers getDrivers() {
-        return drivers;
     }
 
     public String getBusNo() {
         return BusNo;
     }
 
-    public void setDrivers(Drivers drivers) {
-        this.drivers = drivers;
+    public String getUser_id() {
+        return user_id;
     }
 
     public void setBusNo(String busNo) {
         BusNo = busNo;
     }
 
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
     @Override
     public String toString() {
-        return "Buses{" +
-                "drivers=" + drivers +
-                ", BusNo='" + BusNo + '\'' +
-                '}';
+        return BusNo ;
+
     }
 }

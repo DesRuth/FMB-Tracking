@@ -28,15 +28,13 @@ public class Drivers implements Parcelable{
         avatar = in.readString();
     }
 
-    public static final Creator<User> CREATOR = new Creator<User>() {
+    public static final Creator<Drivers> CREATOR = new Creator<Drivers>() {
         @Override
-        public User createFromParcel(Parcel in) {
-            return new User(in);
+        public Drivers createFromParcel(Parcel in) { return new Drivers(in);
         }
 
         @Override
-        public User[] newArray(int size) {
-            return new User[size];
+        public Drivers[] newArray(int size) { return new Drivers[size];
         }
     };
 
@@ -48,7 +46,7 @@ public class Drivers implements Parcelable{
         this.avatar = avatar;
     }
 
-    public static Creator<User> getCREATOR() {
+    public static Creator<Drivers> getCREATOR() {
         return CREATOR;
     }
 

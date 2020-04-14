@@ -76,7 +76,7 @@ public class PassangerLoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(PassangerLoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(),PassangerHomeActivity.class));
+                            startActivity(new Intent(getApplicationContext(),PassangerBusSelectActivity.class));
                         }else {
                             Toast.makeText(PassangerLoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);

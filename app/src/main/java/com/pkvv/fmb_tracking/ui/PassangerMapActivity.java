@@ -10,6 +10,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.pkvv.fmb_tracking.R;
+import com.pkvv.fmb_tracking.models.Buses;
 
 public class PassangerMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -18,6 +19,8 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passanger_map);
+
+        Buses buses =(Buses) getIntent().getSerializableExtra("key_identify");
         mapPassView = findViewById(R.id.mapPassangerView);
         mapPassView.onCreate(savedInstanceState);
 

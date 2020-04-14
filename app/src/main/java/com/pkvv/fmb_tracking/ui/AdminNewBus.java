@@ -48,7 +48,6 @@ public class AdminNewBus extends AppCompatActivity {
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if (task.isSuccessful()) {
                         Drivers drivers =task.getResult().toObject(Drivers.class);
-                        mbuses.setDrivers(drivers);
                         mbuses.setBusNo(mBusNum);
 
                     }
