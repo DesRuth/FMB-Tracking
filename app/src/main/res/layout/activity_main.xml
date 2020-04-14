@@ -43,5 +43,16 @@
         android:textColor="@color/common_google_signin_btn_text_dark_pressed"
         android:textSize="30sp"
         tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="415dp"
+        android:layout_marginBottom="30dp"/>
+    <Button
+        android:id="@+id/AdmButton"
+        android:layout_width="match_parent"
+        android:layout_height="106dp"
+        android:background="@color/common_google_signin_btn_text_dark_focused"
+        android:text="Admin"
+        android:textColor="@color/common_google_signin_btn_text_dark_pressed"
+        android:textSize="30sp"
+        tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="415dp" />
 </LinearLayout>
