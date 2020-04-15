@@ -4,7 +4,7 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 
-public class Buses implements Serializable {
+public class Buses {
 
     String BusNo  ;
     String user_id;
@@ -35,7 +35,7 @@ public class Buses implements Serializable {
 
     @Override
     public String toString() {
-        return BusNo ;
+        return BusNo;
 
     }
 }
