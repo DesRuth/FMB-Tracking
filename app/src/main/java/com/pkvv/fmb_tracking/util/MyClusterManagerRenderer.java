@@ -27,8 +27,10 @@ public class MyClusterManagerRenderer extends DefaultClusterRenderer<CluserMarke
 
         iconGenerator =new IconGenerator(context.getApplicationContext());
         imageView = new ImageView(context.getApplicationContext());
-        markerWidth = (int) context.getResources().getDimension(android.R.dimen.thumbnail_width);
-        markerHeight = (int) context.getResources().getDimension(android.R.dimen.thumbnail_height);
+       // markerWidth = (int) context.getResources().getDimension(android.R.dimen.thumbnail_width);
+       // markerHeight = (int) context.getResources().getDimension(android.R.dimen.thumbnail_height);
+        markerWidth=150;
+        markerHeight=150;
         imageView.setLayoutParams(new ViewGroup.LayoutParams( markerWidth,markerHeight));
         imageView.setPadding(1,1,1,1);
         iconGenerator.setContentView(imageView);

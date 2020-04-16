@@ -8,14 +8,14 @@ public class CluserMarker implements ClusterItem {
  private String title;
  private  String snippet;
  private  int iconPicture;
- private Drivers drivers;
 
-    public CluserMarker(LatLng position, String title, String snippet, int iconPicture, Drivers drivers) {
+
+    public CluserMarker(LatLng position, String title, String snippet, int iconPicture) {
         this.position = position;
         this.title = title;
         this.snippet = snippet;
         this.iconPicture = iconPicture;
-        this.drivers = drivers;
+
     }
     public CluserMarker(){
 
@@ -56,11 +56,5 @@ public class CluserMarker implements ClusterItem {
         this.iconPicture = iconPicture;
     }
 
-    public Drivers getDrivers() {
-        return drivers;
-    }
 
-    public void setDrivers(Drivers drivers) {
-        this.drivers = drivers;
-    }
 }

@@ -126,7 +126,8 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                 );
                 mClusterManager.setRenderer(mClusterManagerRenderer);
             }
-                      loopuserloc();
+            forUSerLocationMarker();
+            forDriverLocationMarker();
 
             mClusterManager.cluster();
 
@@ -134,21 +135,21 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         }
     }
 
-    public void loopuserloc(){
+    public void forUSerLocationMarker(){
 
 
             Log.d(TAG, "addMapMarkers: location: " + "{ latitude=15.8555074, longitude=74.5128201 }");
             try{
                 String snippet = "";
                     snippet = "This is you";
-                int avatar = R.drawable.user_mark; // set the default avatar
+                int avatar = R.drawable.userlogo; // set the default avatar
 
                 CluserMarker newClusterMarker = new CluserMarker(
                         new LatLng(15.8555074, 74.5128201),
                         "You",
                         snippet,
-                        avatar,
-                        userLocation.getUser()
+                        avatar
+
                 );
                 mClusterManager.addItem(newClusterMarker);
                 mClusterMarker.add(newClusterMarker);
@@ -156,6 +157,32 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
             }catch (NullPointerException e){
                 Log.e(TAG, "addMapMarkers: NullPointerException: " + e.getMessage() );
             }
+
+
+    }
+
+    public void forDriverLocationMarker(){
+
+
+        Log.d(TAG, "addMapMarkers: location: " + "{ latitude=15.8755074, longitude=74.5428201 }");
+        try{
+            String snippet = "";
+            snippet = "Bus";
+            int avatar = R.drawable.bus_logo; // set the default avatar
+
+            CluserMarker newClusterMarker = new CluserMarker(
+                    new LatLng(15.8755074, 74.548201),
+                    "Driver",
+                    snippet,
+                    avatar
+
+            );
+            mClusterManager.addItem(newClusterMarker);
+            mClusterMarker.add(newClusterMarker);
+
+        }catch (NullPointerException e){
+            Log.e(TAG, "addMapMarkers: NullPointerException: " + e.getMessage() );
+        }
 
 
     }
@@ -253,9 +280,9 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
         map.setMyLocationEnabled(true);
         mGoogleMap=map;
-        //Log.d(TAG, "onMapReady: trail user pos"+mDriverPosition.getGeo_point().getLongitude()+mDriverPosition.getGeo_point().getLongitude());
-        setCameraView();
-       // Log.d(TAG, "onComplete: on Map"+mDriverPosition.getGeo_point());
+
+        addMapMarkers();
+
 
 
 
