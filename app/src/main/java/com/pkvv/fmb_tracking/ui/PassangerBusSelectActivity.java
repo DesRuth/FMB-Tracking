@@ -60,7 +60,7 @@ public class PassangerBusSelectActivity extends AppCompatActivity {
                 for(DocumentSnapshot snapshot : queryDocumentSnapshots){
                     Buses buses = snapshot.toObject(Buses.class);
                     Listbuses.add(buses);
-                    Log.d(TAG, "onEvent: list"+Listbuses.get(0).getUser_id());
+
 
                 }
             }
@@ -84,7 +84,7 @@ public class PassangerBusSelectActivity extends AppCompatActivity {
         }
 
 
-        //Toast.makeText(PassangerBusSelectActivity.this,Listbuses.get(0).getUser_id(),Toast.LENGTH_LONG).show();
+
 
         Intent intent =new Intent(PassangerBusSelectActivity.this,PassangerMapActivity.class);
         intent.putExtra("key_identify",Listbuses.get(pos).getUser_id());
