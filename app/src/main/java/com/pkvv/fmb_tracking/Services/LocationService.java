@@ -34,6 +34,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.pkvv.fmb_tracking.DriverClient;
 import com.pkvv.fmb_tracking.R;
+import com.pkvv.fmb_tracking.models.DriverCurrentLocation;
 import com.pkvv.fmb_tracking.models.DriverLocation;
 import com.pkvv.fmb_tracking.models.Drivers;
 
@@ -111,28 +112,28 @@ public class LocationService extends Service {
                         if (location != null) {
 
                             GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                            DriverLocation driverLocation = new DriverLocation(null, geoPoint, null);
-                            saveDriverLocation(driverLocation);
+                            DriverCurrentLocation driverCurrentLocation = new DriverCurrentLocation(FirebaseAuth.getInstance().getUid(), geoPoint, null);
+                            saveDriverLocation(driverCurrentLocation);
                         }
                     }
                 },
                 Looper.myLooper()); // Looper.myLooper tells this to repeat forever until thread is destroyed
     }
 
-    private void saveDriverLocation(final DriverLocation driverLocation){
+    private void saveDriverLocation(final DriverCurrentLocation driverCurrentLocation){
 
         try{
             DocumentReference locationRef = FirebaseFirestore.getInstance()
-                    .collection("Driver Location")
+                    .collection("Driver Current Location")
                     .document(FirebaseAuth.getInstance().getUid());
 
-            locationRef.set(driverLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
+            locationRef.set(driverCurrentLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful()){
                         Log.d(TAG, "onComplete: \ninserted user location into database." +
-                                "\n latitude: " + driverLocation.getGeo_point().getLatitude() +
-                                "\n longitude: " + driverLocation.getGeo_point().getLongitude());
+                                "\n latitude: " + driverCurrentLocation.getGeo_point().getLatitude() +
+                                "\n longitude: " + driverCurrentLocation.getGeo_point().getLongitude());
                     }
                 }
             });

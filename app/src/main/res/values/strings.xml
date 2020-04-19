@@ -7,6 +7,7 @@
     <string name="collection_user_location">User Location</string>
     <string name="collection_driver_location">Driver Location</string>
     <string name="collection_buses">Buses</string>
+    <string name="collection_driver_current_location">Driver Current Location</string>
 
 
     <!--google maps!-->

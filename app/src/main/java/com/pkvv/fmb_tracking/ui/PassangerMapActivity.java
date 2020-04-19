@@ -3,14 +3,24 @@ package com.pkvv.fmb_tracking.ui;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -36,6 +46,7 @@ import com.google.maps.model.DirectionsResult;
 import com.pkvv.fmb_tracking.R;
 import com.pkvv.fmb_tracking.models.Buses;
 import com.pkvv.fmb_tracking.models.CluserMarker;
+import com.pkvv.fmb_tracking.models.DriverCurrentLocation;
 import com.pkvv.fmb_tracking.models.DriverLocation;
 import com.pkvv.fmb_tracking.models.User;
 import com.pkvv.fmb_tracking.models.UserLocation;
@@ -59,6 +70,17 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     private ClusterManager mClusterManager;
     private MyClusterManagerRenderer mClusterManagerRenderer;
     private ArrayList<CluserMarker> mClusterMarker = new ArrayList<>();
+    String st;
+
+    //extra
+    private FusedLocationProviderClient mFusedLocationClient;
+    private final static long UPDATE_INTERVAL = 4 * 1000;  /* 4 secs */
+    private final static long FASTEST_INTERVAL = 2000; /* 2 sec */
+    private Handler mHandler = new Handler();
+    private Runnable mRunnable;
+    private static final int LOCATION_UPDATE_INTERVAL = 4000;
+    private GeoPoint geoloc;
+    //extra
 
 
 
@@ -83,10 +105,14 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         mDriverPosition = new DriverLocation();
 
 
-        String st =(String) getIntent().getStringExtra("key_identify");
-        getDriverLoc(st);
-        getUserLoc();
+        st =(String) getIntent().getStringExtra("key_identify");
+      //  getDriverLoc(st);
+       // getUserLoc();
 
+        //extra
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        getUserLocationUpdates();
+        //extra
 
 
 
@@ -95,6 +121,122 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
 
     }
+
+    private void startUserLocationsRunnable(){
+        Log.d(TAG, "startUserLocationsRunnable: starting runnable for retrieving updated locations.");
+        mHandler.postDelayed(mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run: user location updates"+geoloc);
+                mHandler.postDelayed(mRunnable, LOCATION_UPDATE_INTERVAL);
+                retrieveUserLocations();
+            }
+        }, LOCATION_UPDATE_INTERVAL);
+    }
+
+    private void stopLocationUpdates(){
+        mHandler.removeCallbacks(mRunnable);
+    }
+
+    private void retrieveUserLocations(){
+        Log.d(TAG, "retrieveUserLocations: retrieving location of all users in the chatroom.");
+
+        try {
+
+
+            LatLng updatedLatLng = new LatLng(
+                    geoloc.getLatitude(),
+                    geoloc.getLongitude()
+            );
+
+            mClusterMarker.get(0).setPosition(updatedLatLng);
+            mClusterManagerRenderer.setUpdateMarker(mClusterMarker.get(0));
+
+
+
+        } catch (NullPointerException e) {
+            Log.e(TAG, "retrieveUserLocations: NullPointerException: " + e.getMessage());
+        }
+
+        try{
+
+
+                DocumentReference userLocationRef = FirebaseFirestore.getInstance()
+                        .collection(getString(R.string.collection_driver_current_location))
+                        .document(st);
+
+                userLocationRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+
+                            final DriverCurrentLocation updatedDriverLocation = task.getResult().toObject(DriverCurrentLocation.class);
+
+                                try {
+
+
+                                        LatLng updatedLatLng = new LatLng(
+                                                updatedDriverLocation.getGeo_point().getLatitude(),
+                                                updatedDriverLocation.getGeo_point().getLongitude()
+                                        );
+
+                                    mClusterMarker.get(1).setPosition(updatedLatLng);
+                                        mClusterManagerRenderer.setUpdateMarker(mClusterMarker.get(1));
+
+                                } catch (NullPointerException e) {
+                                    Log.e(TAG, "retrieveUserLocations: NullPointerException: " + e.getMessage());
+                                }
+
+                        }
+                    }
+                });
+
+        }catch (IllegalStateException e){
+            Log.e(TAG, "retrieveUserLocations: Fragment was destroyed during Firestore query. Ending query." + e.getMessage() );
+        }
+
+    }
+
+
+
+    public void getUserLocationUpdates(){
+
+
+        // ---------------------------------- LocationRequest ------------------------------------
+        // Create the location request to start receiving updates
+        LocationRequest mLocationRequestHighAccuracy = new LocationRequest();
+        mLocationRequestHighAccuracy.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequestHighAccuracy.setInterval(UPDATE_INTERVAL);
+        mLocationRequestHighAccuracy.setFastestInterval(FASTEST_INTERVAL);
+
+
+        // new Google API SDK v11 uses getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "getLocation: stopping the location service.");
+            return;
+        }
+        Log.d(TAG, "getLocation: getting location information.");
+        mFusedLocationClient.requestLocationUpdates(mLocationRequestHighAccuracy, new LocationCallback() {
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+
+                        Log.d(TAG, "onLocationResult: got location result.");
+
+                        Location location = locationResult.getLastLocation();
+
+                        if (location != null) {
+
+                            GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+                            DriverCurrentLocation driverCurrentLocation = new DriverCurrentLocation(FirebaseAuth.getInstance().getUid(), geoPoint, null);
+                                        geoloc=geoPoint;
+                        }
+                    }
+                },
+                Looper.myLooper()); // Looper.myLooper tells this to repeat forever until thread is destroyed
+    }
+
+
 
     private void initGoogleMap(Bundle savedInstanceState) {
         // *** IMPORTANT ***
@@ -204,63 +346,11 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     }
 
 
-
-    //geting driver location
-    public  void getDriverLoc(String st){
-
-        DocumentReference locationRef = mdb.collection(getString(R.string.collection_driver_location))
-                .document(st);
-        locationRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()){
-                    if(task.getResult().toObject(DriverLocation.class)!=null){
-                        mDriverPosition.setDrivers(task.getResult().toObject(DriverLocation.class).getDrivers());
-                        mDriverPosition.setGeo_point(task.getResult().toObject(DriverLocation.class).getGeo_point());
-                        mDriverPosition.setTimestamp(task.getResult().toObject(DriverLocation.class).getTimestamp());
-
-
-                    }
-                }
-            }
-        });
-
-    }
-
-   public void  getUserLoc(){
-
-
-        DocumentReference locationRef = mdb.collection(getString(R.string.collection_user_location))
-                .document(FirebaseAuth.getInstance().getUid());
-
-        locationRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()){
-                    if(task.getResult().toObject(UserLocation.class)!=null){
-                        mUserPosition.setUser(task.getResult().toObject(UserLocation.class).getUser());
-                        mUserPosition.setGeo_point(task.getResult().toObject(DriverLocation.class).getGeo_point());
-                        mUserPosition.setTimestamp(task.getResult().toObject(DriverLocation.class).getTimestamp());
-
-                    }
-                }
-                Log.d(TAG, "onComplete: user inside uio"+mUserPosition.getGeo_point());
-
-            }
-        });
-
-
-    }
-
-
-
-
-
-
     @Override
     protected void onResume() {
         super.onResume();
         mapPassView.onResume();
+        startUserLocationsRunnable();
     }
 
     @Override
@@ -282,16 +372,13 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         mGoogleMap=map;
 
         addMapMarkers();
-
-
-
-
     }
 
     @Override
     protected void onPause() {
         mapPassView.onPause();
         super.onPause();
+        stopLocationUpdates();
     }
 
     @Override

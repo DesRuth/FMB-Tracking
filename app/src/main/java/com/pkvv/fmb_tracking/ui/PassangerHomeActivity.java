@@ -60,62 +60,11 @@ public class PassangerHomeActivity extends AppCompatActivity {
         mdb = FirebaseFirestore.getInstance();
     }
 
-    private void getUserDetails(){
-   if(mUserLocation==null){
-    mUserLocation = new UserLocation();
-    DocumentReference userRef = mdb.collection(getString(R.string.collection_users))
-            .document(FirebaseAuth.getInstance().getUid());
-    userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-        @Override
-        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-            if (task.isSuccessful()) {
-                User user =task.getResult().toObject(User.class);
-                mUserLocation.setUser(user);
-                getLastKnownLocation();
-            }
-        }
-    });
 
-    }
-    }
 
-    private void saveUserLocation(){
-        if(mUserLocation!=null){
-            DocumentReference locationRef =mdb.collection(getString(R.string.collection_user_location))
-                    .document(FirebaseAuth.getInstance().getUid());
-            locationRef.set(mUserLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()){
 
-                    }
-                }
-            });
-        }
-    }
 
-//get location
 
-    private void getLastKnownLocation() {
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if (task.isSuccessful()) {
-                    Location location = task.getResult();
-                    GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                    mUserLocation.setGeo_point(geoPoint);
-                    mUserLocation.setTimestamp(null);
-                    saveUserLocation();
-
-                }
-            }
-        });
-
-    }
 
     //start
     private boolean checkMapServices() {
@@ -161,7 +110,7 @@ public class PassangerHomeActivity extends AppCompatActivity {
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-            getUserDetails();
+
 
         } else {
             ActivityCompat.requestPermissions(this,
@@ -214,7 +163,7 @@ public class PassangerHomeActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ENABLE_GPS: {
                 if (mLocationPermissionGranted) {
-                    getUserDetails();
+
 
                 } else {
                     getLocationPermission();
@@ -229,7 +178,7 @@ public class PassangerHomeActivity extends AppCompatActivity {
         super.onResume();
         if (checkMapServices()) {
             if (mLocationPermissionGranted) {
-                getUserDetails();
+
             } else {
                 getLocationPermission();
             }
