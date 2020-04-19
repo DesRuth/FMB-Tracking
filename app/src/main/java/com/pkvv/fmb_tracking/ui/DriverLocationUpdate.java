@@ -240,7 +240,7 @@ public class DriverLocationUpdate extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.logoutMenu:
                 FirebaseAuth.getInstance().signOut();//logout
-                startActivity(new Intent(getApplicationContext(), PassangerLoginActivity.class));
+                startActivity(new Intent(getApplicationContext(), DriverLoginActivity.class));
                 finish();
                 return true;
         }

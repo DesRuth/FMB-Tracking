@@ -55,6 +55,14 @@ public class DriverLoginActivity extends AppCompatActivity {
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
 
+        if(fAuth.getCurrentUser()!=null){
+            Toast.makeText(DriverLoginActivity.this, "welcome back", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getApplicationContext(), DriverLocationUpdate.class));
+            finish();
+
+
+        }
+
 
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,20 +91,23 @@ public class DriverLoginActivity extends AppCompatActivity {
 
                 // authenticate the user
 
-                fAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(DriverLoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(),DriverLocationUpdate.class));
+                          fAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                              @Override
+                              public void onComplete(@NonNull Task<AuthResult> task) {
+                                  if (task.isSuccessful()) {
+                                      Toast.makeText(DriverLoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
+                                      startActivity(new Intent(getApplicationContext(), DriverLocationUpdate.class));
+                                      finish();
 
-                        }else {
-                            Toast.makeText(DriverLoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                            progressBar.setVisibility(View.GONE);
-                        }
+                                  } else {
+                                      Toast.makeText(DriverLoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                      progressBar.setVisibility(View.GONE);
+                                  }
 
-                    }
-                });
+                              }
+                          });
+
+
 
             }
         });
