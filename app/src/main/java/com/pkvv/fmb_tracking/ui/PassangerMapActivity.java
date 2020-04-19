@@ -278,7 +278,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     @Override
     public void onMapReady(GoogleMap map) {
 
-        map.setMyLocationEnabled(true);
+        //map.setMyLocationEnabled(true);
         mGoogleMap=map;
 
         addMapMarkers();

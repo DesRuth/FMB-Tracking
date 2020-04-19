@@ -9,8 +9,13 @@
     <string name="collection_buses">Buses</string>
 
 
-
     <!--google maps!-->
     <string name="Google_Maps_Api_Key">AIzaSyBotCZ8jIZ9uo5x-N4uYGEP62muPUkg0yg</string>
+    
+    
+    <string name="login_shared_preference">com.pkvv.fmb_tracking.ui_login_shared_preference</string>\
+    <string name="login_status_shared_preference">com.pkvv.fmb_tracking.ui_login_status_shared_preference</string>
+    <string name="username">trueline</string>
+    <string name="password">solution</string>
 
 </resources>

@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,7 +23,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.pkvv.fmb_tracking.DriverClient;
 import com.pkvv.fmb_tracking.R;
+import com.pkvv.fmb_tracking.models.Drivers;
+import com.pkvv.fmb_tracking.models.User;
 
 public class DriverLoginActivity extends AppCompatActivity {
     EditText mEmail,mPassword;
@@ -30,6 +38,8 @@ public class DriverLoginActivity extends AppCompatActivity {
     TextView mCreateBtn,forgotTextLink;
     ProgressBar progressBar;
     FirebaseAuth fAuth;
+
+
 
 
     @Override
@@ -41,9 +51,6 @@ public class DriverLoginActivity extends AppCompatActivity {
         mPassword = findViewById(R.id.password);
         progressBar = findViewById(R.id.progressBar);
         fAuth = FirebaseAuth.getInstance();
-
-
-
         mLoginBtn = findViewById(R.id.loginBtn);
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
@@ -81,7 +88,7 @@ public class DriverLoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(DriverLoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(getApplicationContext(), DriverHomeActivity.class));
+                            startActivity(new Intent(getApplicationContext(),DriverLocationUpdate.class));
 
                         }else {
                             Toast.makeText(DriverLoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -120,6 +127,7 @@ public class DriverLoginActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 Toast.makeText(DriverLoginActivity.this, "Reset Link Sent To Your Email.", Toast.LENGTH_SHORT).show();
+
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override

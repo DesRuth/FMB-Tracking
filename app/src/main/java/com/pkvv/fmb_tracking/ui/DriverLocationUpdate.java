@@ -5,126 +5,102 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
-
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.api.LogDescriptor;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
-import com.pkvv.fmb_tracking.MainActivity;
 import com.pkvv.fmb_tracking.R;
-import com.pkvv.fmb_tracking.models.DriverLocation;
-import com.pkvv.fmb_tracking.models.Drivers;
-import com.pkvv.fmb_tracking.models.User;
-import com.pkvv.fmb_tracking.models.UserLocation;
+import com.pkvv.fmb_tracking.Services.LocationService;
 
 import static com.pkvv.fmb_tracking.Constants.ERROR_DIALOG_REQUEST;
 import static com.pkvv.fmb_tracking.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.pkvv.fmb_tracking.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
-public class DriverHomeActivity extends AppCompatActivity {
-
-    FirebaseAuth fAuth;
-    private boolean mLocationPermissionGranted=false;
+public class DriverLocationUpdate extends AppCompatActivity {
+    private static final String TAG = "DriverLocationUpdate";
+    Button btnStartService;
     private FusedLocationProviderClient mFusedLocationClient;
-    private DriverLocation mDriverLocation;
-    private FirebaseFirestore mdb;
-
+    private boolean mLocationPermissionGranted = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_driver_home);
+        setContentView(R.layout.activity_driver_location_update);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        btnStartService = findViewById(R.id.buttonStartService);
 
-        fAuth = FirebaseAuth.getInstance();
-        mdb = FirebaseFirestore.getInstance();
 
-    }
-
-    private void getdriversDetails(){
-        if(mDriverLocation==null){
-            mDriverLocation = new DriverLocation();
-            DocumentReference driversRef = mdb.collection(getString(R.string.collection_drivers))
-                    .document(FirebaseAuth.getInstance().getUid());
-            driversRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        Drivers drivers =task.getResult().toObject(Drivers.class);
-                        mDriverLocation.setDrivers(drivers);
-                        getLastKnownLocation();
-                    }
-                }
-            });
-
-        }
-    }
-
-    private void saveDriverLocation(){
-        if(mDriverLocation!=null){
-            DocumentReference locationRef =mdb.collection(getString(R.string.collection_driver_location))
-                    .document(FirebaseAuth.getInstance().getUid());
-            locationRef.set(mDriverLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()){
-
-                    }
-                }
-            });
-        }
-    }
-
-    //get location
-
-    private void getLastKnownLocation() {
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+        btnStartService.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if (task.isSuccessful()) {
-                    Location location = task.getResult();
-                    GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                    mDriverLocation.setGeo_point(geoPoint);
-                    mDriverLocation.setTimestamp(null);
-                    saveDriverLocation();
-
-                }
+            public void onClick(View v) {
+                startService();
             }
         });
 
+
+
+
+    }
+//    public void startService() {
+//        Intent serviceIntent = new Intent(this, UpdateLocationService.class);
+//        ContextCompat.startForegroundService(this, serviceIntent);
+//        Log.d(TAG, "startService: service started");
+//    }
+//
+//    public void stopService() {
+//        Intent serviceIntent = new Intent(this, UpdateLocationService.class);
+//        stopService(serviceIntent);
+//    }
+
+
+    public void startService() {
+
+        startLocationService();
+
+  }
+
+
+    private void startLocationService(){
+        if(!isLocationServiceRunning()){
+            Intent serviceIntent = new Intent(this, LocationService.class);
+//        this.startService(serviceIntent);
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
+
+                DriverLocationUpdate.this.startForegroundService(serviceIntent);
+            }else{
+                startService(serviceIntent);
+            }
+        }
     }
 
-    //start
+    private boolean isLocationServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
+            if("com.pkvv.fmb_tracking.Services.LocationService".equals(service.service.getClassName())) {
+                Log.d(TAG, "isLocationServiceRunning: location service is already running.");
+                return true;
+            }
+        }
+        Log.d(TAG, "isLocationServiceRunning: location service is not running.");
+        return false;
+    }
 
     private boolean checkMapServices(){
         if(isServicesOK()){
@@ -158,7 +134,6 @@ public class DriverHomeActivity extends AppCompatActivity {
         }
         return true;
     }
-
     private void getLocationPermission() {
         /*
          * Request location permission, so that we can get the location of the
@@ -169,7 +144,7 @@ public class DriverHomeActivity extends AppCompatActivity {
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-            getdriversDetails();
+
 
         } else {
             ActivityCompat.requestPermissions(this,
@@ -179,20 +154,19 @@ public class DriverHomeActivity extends AppCompatActivity {
     }
 
     public boolean isServicesOK(){
-       //tag Log.d(TAG, "isServicesOK: checking google services version");
-      //tag  Log.d(TAG, "isServicesOK: ");
+        Log.d(TAG, "isServicesOK: checking google services version");
 
-        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(DriverHomeActivity.this);
+        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(DriverLocationUpdate.this);
 
         if(available == ConnectionResult.SUCCESS){
             //everything is fine and the user can make map requests
-           //tag Log.d(TAG, "isServicesOK: Google Play Services is working");
+            Log.d(TAG, "isServicesOK: Google Play Services is working");
             return true;
         }
         else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
             //an error occured but we can resolve it
-            //tagLog.d(TAG, "isServicesOK: an error occured but we can fix it");
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(DriverHomeActivity.this, available, ERROR_DIALOG_REQUEST);
+            Log.d(TAG, "isServicesOK: an error occured but we can fix it");
+            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(DriverLocationUpdate.this, available, ERROR_DIALOG_REQUEST);
             dialog.show();
         }else{
             Toast.makeText(this, "You can't make map requests", Toast.LENGTH_SHORT).show();
@@ -219,11 +193,11 @@ public class DriverHomeActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-       //tag Log.d(TAG, "onActivityResult: called.");
+        Log.d(TAG, "onActivityResult: called.");
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ENABLE_GPS: {
                 if(mLocationPermissionGranted){
-                    getdriversDetails();
+
 
                 }
                 else{
@@ -235,45 +209,45 @@ public class DriverHomeActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         if(checkMapServices()){
             if(mLocationPermissionGranted){
-                getdriversDetails();
+
             }
             else{
                 getLocationPermission();
             }
-
         }
     }
 
-    //end
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.welcome,menu);
+        inflater.inflate(R.menu.welcome, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.logoutMenu:
                 FirebaseAuth.getInstance().signOut();//logout
-                startActivity(new Intent(getApplicationContext(),DriverLoginActivity.class));
+                startActivity(new Intent(getApplicationContext(), PassangerLoginActivity.class));
                 finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    //MapMenu
-    public void StartMapMenu(View view) {
-   Intent displayMap = new Intent(DriverHomeActivity.this,DisplayMapActivity.class);
-   startActivity(displayMap);
 
-    }
+
+
 }
-
