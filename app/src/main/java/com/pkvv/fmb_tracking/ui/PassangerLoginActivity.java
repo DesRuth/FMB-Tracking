@@ -44,6 +44,14 @@ public class PassangerLoginActivity extends AppCompatActivity {
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
 
+        if(fAuth.getCurrentUser()!=null){
+            Toast.makeText(PassangerLoginActivity.this, "welcome back", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getApplicationContext(), PassangerBusSelectActivity.class));
+            finish();
+
+
+        }
+
 
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,6 +85,7 @@ public class PassangerLoginActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             Toast.makeText(PassangerLoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(getApplicationContext(),PassangerBusSelectActivity.class));
+                            finish();
                         }else {
                             Toast.makeText(PassangerLoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);

@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -30,6 +32,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -54,7 +57,7 @@ import com.pkvv.fmb_tracking.util.MyClusterManagerRenderer;
 
 import java.util.ArrayList;
 
-public class PassangerMapActivity extends AppCompatActivity implements OnMapReadyCallback  {
+public class PassangerMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
     MapView mapPassView;
     public static final String TAG = "Busesshow";
@@ -78,8 +81,13 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     private final static long FASTEST_INTERVAL = 2000; /* 2 sec */
     private Handler mHandler = new Handler();
     private Runnable mRunnable;
+    private Handler mHandler2 = new Handler();
+    private Handler mHandler3 = new Handler();
     private static final int LOCATION_UPDATE_INTERVAL = 4000;
     private GeoPoint geoloc;
+    private Runnable r3;
+    private Runnable r;
+    private DriverCurrentLocation mdcl;
     //extra
 
 
@@ -112,11 +120,12 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         //extra
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getUserLocationUpdates();
+
+
         //extra
 
 
 
-       Log.d(TAG, "onComplete: driver check"+mDriverPosition.getGeo_point());
 
 
 
@@ -171,6 +180,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                         if(task.isSuccessful()){
 
                             final DriverCurrentLocation updatedDriverLocation = task.getResult().toObject(DriverCurrentLocation.class);
+                                mdcl = updatedDriverLocation;
 
                                 try {
 
@@ -268,6 +278,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                 );
                 mClusterManager.setRenderer(mClusterManagerRenderer);
             }
+            mGoogleMap.setOnInfoWindowClickListener(PassangerMapActivity.this);
             forUSerLocationMarker();
             forDriverLocationMarker();
 
@@ -287,7 +298,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                 int avatar = R.drawable.userlogo; // set the default avatar
 
                 CluserMarker newClusterMarker = new CluserMarker(
-                        new LatLng(15.8555074, 74.5128201),
+                        new LatLng(geoloc.getLatitude(), geoloc.getLongitude()),
                         "You",
                         snippet,
                         avatar
@@ -309,12 +320,12 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         Log.d(TAG, "addMapMarkers: location: " + "{ latitude=15.8755074, longitude=74.5428201 }");
         try{
             String snippet = "";
-            snippet = "Bus";
+            snippet = "find route to this bus";
             int avatar = R.drawable.bus_logo; // set the default avatar
 
             CluserMarker newClusterMarker = new CluserMarker(
-                    new LatLng(15.8755074, 74.548201),
-                    "Driver",
+                    new LatLng(15.8955074, 74.568201),
+                    "bus",
                     snippet,
                     avatar
 
@@ -330,19 +341,50 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     }
 
 
+    public void settingMarkerwithDelay(){
+        mHandler3 = new Handler();
+        r3 = new Runnable()
+        {
+            public void run()
+            {
+                addMapMarkers();
+            }
+        };
+        mHandler3.postDelayed(r3, 2000);
+            }
+
+
+
+
     //camera view
     private void setCameraView(){
-        double bottomBoundary = 15.8555074 - .1;
-        double leftBoundary = 74.5128201 - .1;
-        double topBoundary = 15.8555074 + .1;
-        double rightBoundary = 74.5128201 + .1;
 
-        mMapBoundary = new LatLngBounds(
-                new LatLng(bottomBoundary, leftBoundary),
-                new LatLng(topBoundary, rightBoundary)
-        );
+        mHandler2 = new Handler();
+        r = new Runnable()
+        {
+            public void run()
+            {
+                double bottomBoundary = geoloc.getLatitude() -.001;
+                double leftBoundary = geoloc.getLongitude() - .001;
+                double topBoundary = geoloc.getLatitude() + .001;
+                double rightBoundary = geoloc.getLongitude() + .001;
 
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mMapBoundary,0));
+                mMapBoundary = new LatLngBounds(
+                        new LatLng(bottomBoundary, leftBoundary),
+                        new LatLng(topBoundary, rightBoundary)
+                );
+
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mMapBoundary,0));
+
+            }
+        };
+        mHandler2.postDelayed(r, 2000);
+
+
+
+    }
+    private void stopCameraView(){
+        mHandler2.removeCallbacks(r);
     }
 
 
@@ -371,7 +413,8 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         //map.setMyLocationEnabled(true);
         mGoogleMap=map;
 
-        addMapMarkers();
+        settingMarkerwithDelay();
+
     }
 
     @Override
@@ -379,6 +422,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         mapPassView.onPause();
         super.onPause();
         stopLocationUpdates();
+        stopCameraView();
     }
 
     @Override
@@ -402,5 +446,31 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     public void onLowMemory() {
         super.onLowMemory();
         mapPassView.onLowMemory();
+    }
+
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        if(marker.getSnippet().equals("This is you")){
+            marker.hideInfoWindow();
+        }
+        else{
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+            builder.setMessage(marker.getSnippet())
+                    .setCancelable(true)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            dialog.cancel();
+                        }
+                    });
+            final AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 }
