@@ -36,7 +36,7 @@ public class PassangerBusSelectActivity extends AppCompatActivity {
     public static final String TAG = "BusesList";
     EditText etxt;
     List<Buses> Listbuses=new ArrayList<>();
-    int pos  ;
+    int pos =0;
 
 
 
@@ -65,24 +65,28 @@ public class PassangerBusSelectActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-
-
-
         //spinner
 
     }
 
     public void getData(View view){
 
-        for(int i=0 ; i<Listbuses.size();i++ ){
-            if(i==Integer.parseInt(Listbuses.get(i).getBusNo())){
-                pos = i;
-                break;
-            }
-        }
+        String busn = etxt.getText().toString().trim();
+//        for(int i=0 ; i<Listbuses.size();i++ ){
+//            if(busn == Listbuses.get(i).getBusNo().toString()){
+//                Log.d(TAG, "getData: entered num"+busn);
+//                Log.d(TAG, "getData: num in list"+Listbuses.get(i).getBusNo());
+//                pos = i;
+//                break;
+//            }
+//        }
 
+       pos =Integer.parseInt(busn)-1;
+
+        if (pos >= Listbuses.size()) {
+           etxt.setError("please enter a valid bus number");
+           return;
+        }
 
 
 

@@ -7,7 +7,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,69 +23,96 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.pkvv.fmb_tracking.R;
 
 public class AdminLoginActivity extends AppCompatActivity {
-    EditText mEmail,mPassword;
+    EditText mEmail,mPassword,mAdminKey;
     Button mLoginBtn;
     TextView mCreateBtn,forgotTextLink;
     ProgressBar progressBar;
     FirebaseAuth fAuth;
 
+    String Akey="1234";
+    private static final String TAG ="AdminLoginActivity";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_passanger_login);
+        setContentView(R.layout.activity_admin_login);
 
         mEmail = findViewById(R.id.Email);
         mPassword = findViewById(R.id.password);
         progressBar = findViewById(R.id.progressBar);
         fAuth = FirebaseAuth.getInstance();
+
         mLoginBtn = findViewById(R.id.loginBtn);
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
+        mAdminKey = findViewById(R.id.AdminKey);
+
+        if(fAuth.getCurrentUser()!=null){
+            Toast.makeText(AdminLoginActivity.this, "welcome back", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(getApplicationContext(), AdminHomeActivity.class));
+            finish();
+
+
+        }
+
 
 
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                String email = mEmail.getText().toString().trim();
-                String password = mPassword.getText().toString().trim();
+                        String email = mEmail.getText().toString().trim();
+                        String password = mPassword.getText().toString().trim();
+                        String UniqueAdminKey = mAdminKey.getText().toString().trim();
 
-                if(TextUtils.isEmpty(email)){
-                    mEmail.setError("Email is Required.");
-                    return;
-                }
-
-                if(TextUtils.isEmpty(password)){
-                    mPassword.setError("Password is Required.");
-                    return;
-                }
-
-                if(password.length() < 6){
-                    mPassword.setError("Password Must be >= 6 Characters");
-                    return;
-                }
-
-                progressBar.setVisibility(View.VISIBLE);
-
-                // authenticate the user
-
-                fAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(AdminLoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(),AdminHomeActivity.class));
-                        }else {
-                            Toast.makeText(AdminLoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                            progressBar.setVisibility(View.GONE);
+                        if (TextUtils.isEmpty(email)) {
+                            mEmail.setError("Email is Required.");
+                            return;
                         }
 
-                    }
-                });
+                        if (TextUtils.isEmpty(password)) {
+                            mPassword.setError("Password is Required.");
+                            return;
+                        }
+
+                        if (password.length() < 6) {
+                            mPassword.setError("Password Must be >= 6 Characters");
+                            return;
+                        }
+                Log.d(TAG, "onClick:Dkey"+Akey);
+                Log.d(TAG, "onClick:Unique"+UniqueAdminKey);
+
+                        if(!UniqueAdminKey.equals(Akey)){
+                            mAdminKey.setError("Unique Admin key did not match");
+                            return;
+                        }
+
+                        progressBar.setVisibility(View.VISIBLE);
+
+                        // authenticate the user
+
+                        fAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(AdminLoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(getApplicationContext(), AdminHomeActivity.class));
+                                } else {
+                                    Toast.makeText(AdminLoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    progressBar.setVisibility(View.GONE);
+                                }
+
+                            }
+                        });
 
             }
         });
@@ -139,6 +168,7 @@ public class AdminLoginActivity extends AppCompatActivity {
 
 
     }
+
 }
 
 

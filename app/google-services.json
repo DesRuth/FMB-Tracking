@@ -1,34 +1,34 @@
 {
   "project_info": {
-    "project_number": "889124311013",
-    "firebase_url": "https://fmb-tracking.firebaseio.com",
-    "project_id": "fmb-tracking",
-    "storage_bucket": "fmb-tracking.appspot.com"
+    "project_number": "530189183212",
+    "firebase_url": "https://fmb-tracking-910e6.firebaseio.com",
+    "project_id": "fmb-tracking-910e6",
+    "storage_bucket": "fmb-tracking-910e6.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:889124311013:android:df0c2f3e7815ce44e6290c",
+        "mobilesdk_app_id": "1:530189183212:android:63aca424b7cd8aedd1ddc9",
         "android_client_info": {
           "package_name": "com.pkvv.fmb_tracking"
         }
       },
       "oauth_client": [
         {
-          "client_id": "889124311013-v8n5q4225iq90v8raen4b9iump01n5ah.apps.googleusercontent.com",
+          "client_id": "530189183212-bi6f2umjtqso982uatu2kg4145k8814s.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDfUNID8UWHAnwyp3shiB2Rha1VHQTnxzk"
+          "current_key": "AIzaSyAeTwTn_nMi9l3Wj05HURV0jCOtC2ZgIPg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "889124311013-v8n5q4225iq90v8raen4b9iump01n5ah.apps.googleusercontent.com",
+              "client_id": "530189183212-bi6f2umjtqso982uatu2kg4145k8814s.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

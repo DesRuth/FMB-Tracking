@@ -20,6 +20,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 
 }
 
@@ -41,6 +45,7 @@ dependencies {
 
     implementation 'com.google.maps:google-maps-services:0.11.0'
     implementation 'org.slf4j:slf4j-nop:2.0.0-alpha1'
+
 }
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'

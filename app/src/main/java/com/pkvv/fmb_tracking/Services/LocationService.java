@@ -58,6 +58,7 @@ public class LocationService extends Service {
     public void onCreate() {
         super.onCreate();
 
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         if (Build.VERSION.SDK_INT >= 26) {
@@ -81,6 +82,7 @@ public class LocationService extends Service {
         Log.d(TAG, "onStartCommand: called.");
         getLocation();
         return START_NOT_STICKY;
+
     }
 
     private void getLocation() {
@@ -91,6 +93,7 @@ public class LocationService extends Service {
         mLocationRequestHighAccuracy.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequestHighAccuracy.setInterval(UPDATE_INTERVAL);
         mLocationRequestHighAccuracy.setFastestInterval(FASTEST_INTERVAL);
+
 
 
         // new Google API SDK v11 uses getFusedLocationProviderClient(this)

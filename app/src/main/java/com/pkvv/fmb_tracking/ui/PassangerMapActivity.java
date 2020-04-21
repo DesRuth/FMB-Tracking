@@ -58,7 +58,6 @@ import com.pkvv.fmb_tracking.util.MyClusterManagerRenderer;
 import java.util.ArrayList;
 
 public class PassangerMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
-
     MapView mapPassView;
     public static final String TAG = "Busesshow";
    private  GeoApiContext mGeoApiContext = null;
@@ -88,6 +87,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     private Runnable r3;
     private Runnable r;
     private DriverCurrentLocation mdcl;
+
     //extra
 
 
@@ -124,11 +124,40 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
         //extra
 
+    }
 
+    private void calculateDirections(){
+        Log.d(TAG, "calculateDirections: calculating directions.");
 
+        com.google.maps.model.LatLng destination = new com.google.maps.model.LatLng(
+                15.8203428,
+                74.4964214
+        );
+        DirectionsApiRequest directions = new DirectionsApiRequest(mGeoApiContext);
 
+        directions.alternatives(true);
+        directions.origin(
+                new com.google.maps.model.LatLng(
+                        15.8403428,
+                        74.4864214
+                )
+        );
+        Log.d(TAG, "calculateDirections: destination: " + destination.toString());
+        directions.destination(destination).setCallback(new PendingResult.Callback<DirectionsResult>() {
+            @Override
+            public void onResult(DirectionsResult result) {
+                Log.d(TAG, "calculateDirections: routes: " + result.routes[0].toString());
+                Log.d(TAG, "calculateDirections: duration: " + result.routes[0].legs[0].duration);
+                Log.d(TAG, "calculateDirections: distance: " + result.routes[0].legs[0].distance);
+                Log.d(TAG, "calculateDirections: geocodedWayPoints: " + result.geocodedWaypoints[0].toString());
+            }
 
+            @Override
+            public void onFailure(Throwable e) {
+                Log.e(TAG, "calculateDirections: Failed to get directions: " + e.getMessage() );
 
+            }
+        });
     }
 
     private void startUserLocationsRunnable(){
@@ -201,9 +230,13 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                     }
                 });
 
+
         }catch (IllegalStateException e){
             Log.e(TAG, "retrieveUserLocations: Fragment was destroyed during Firestore query. Ending query." + e.getMessage() );
         }
+
+
+        calculateDirections();
 
     }
 
@@ -259,6 +292,15 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
         mapPassView.onCreate(mapViewBundle);
         mapPassView.getMapAsync(this);
+
+        if(mGeoApiContext == null){
+            mGeoApiContext = new GeoApiContext.Builder()
+                    .apiKey("AIzaSyDNFpAIhSeH62DaDBVemYXjffCRdyC5Rug")
+                    .build();
+
+        }
+
+
     }
 
 

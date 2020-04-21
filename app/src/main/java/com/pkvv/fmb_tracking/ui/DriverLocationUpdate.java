@@ -26,6 +26,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.firebase.auth.FirebaseAuth;
+import com.pkvv.fmb_tracking.Constants;
+import com.pkvv.fmb_tracking.MainActivity;
 import com.pkvv.fmb_tracking.R;
 import com.pkvv.fmb_tracking.Services.LocationService;
 
@@ -38,12 +40,14 @@ public class DriverLocationUpdate extends AppCompatActivity {
     Button btnStartService;
     private FusedLocationProviderClient mFusedLocationClient;
     private boolean mLocationPermissionGranted = false;
+    public static final String status ="StopService";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_location_update);
 
         btnStartService = findViewById(R.id.buttonStartService);
+
 
 
         btnStartService.setOnClickListener(new View.OnClickListener() {
@@ -56,17 +60,10 @@ public class DriverLocationUpdate extends AppCompatActivity {
 
 
 
+
+
     }
-//    public void startService() {
-//        Intent serviceIntent = new Intent(this, UpdateLocationService.class);
-//        ContextCompat.startForegroundService(this, serviceIntent);
-//        Log.d(TAG, "startService: service started");
-//    }
-//
-//    public void stopService() {
-//        Intent serviceIntent = new Intent(this, UpdateLocationService.class);
-//        stopService(serviceIntent);
-//    }
+
 
 
     public void startService() {
@@ -79,7 +76,7 @@ public class DriverLocationUpdate extends AppCompatActivity {
     private void startLocationService(){
         if(!isLocationServiceRunning()){
             Intent serviceIntent = new Intent(this, LocationService.class);
-//        this.startService(serviceIntent);
+
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
 
@@ -240,7 +237,7 @@ public class DriverLocationUpdate extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.logoutMenu:
                 FirebaseAuth.getInstance().signOut();//logout
-                startActivity(new Intent(getApplicationContext(), DriverLoginActivity.class));
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
                 return true;
         }

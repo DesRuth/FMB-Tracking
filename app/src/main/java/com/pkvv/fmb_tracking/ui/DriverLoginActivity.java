@@ -33,12 +33,14 @@ import com.pkvv.fmb_tracking.models.Drivers;
 import com.pkvv.fmb_tracking.models.User;
 
 public class DriverLoginActivity extends AppCompatActivity {
-    EditText mEmail,mPassword;
+    EditText mEmail,mPassword,mDriverKey;
     Button mLoginBtn;
     TextView mCreateBtn,forgotTextLink;
     ProgressBar progressBar;
     FirebaseAuth fAuth;
 
+    String Dkey ="1234";
+    private static final String TAG ="DriverLoginActivity";
 
 
 
@@ -51,9 +53,12 @@ public class DriverLoginActivity extends AppCompatActivity {
         mPassword = findViewById(R.id.password);
         progressBar = findViewById(R.id.progressBar);
         fAuth = FirebaseAuth.getInstance();
+
         mLoginBtn = findViewById(R.id.loginBtn);
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
+        mDriverKey = findViewById(R.id.DriverKey);
+
 
         if(fAuth.getCurrentUser()!=null){
             Toast.makeText(DriverLoginActivity.this, "welcome back", Toast.LENGTH_SHORT).show();
@@ -64,12 +69,14 @@ public class DriverLoginActivity extends AppCompatActivity {
         }
 
 
+
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 String email = mEmail.getText().toString().trim();
                 String password = mPassword.getText().toString().trim();
+                String UniqueDriverKey = mDriverKey.getText().toString().trim();
 
 
                 if(TextUtils.isEmpty(email)){
@@ -84,6 +91,13 @@ public class DriverLoginActivity extends AppCompatActivity {
 
                 if(password.length() < 6){
                     mPassword.setError("Password Must be >= 6 Characters");
+                    return;
+                }
+
+                Log.d(TAG, "onClick:"+Dkey);
+                Log.d(TAG, "onClick:"+UniqueDriverKey);
+                if(!UniqueDriverKey.equals(Dkey)){
+                    mDriverKey.setError("Unique Driver key did not match");
                     return;
                 }
 
