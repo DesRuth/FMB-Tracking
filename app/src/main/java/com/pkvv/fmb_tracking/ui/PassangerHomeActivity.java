@@ -209,7 +209,7 @@ public class PassangerHomeActivity extends AppCompatActivity {
 
     //MapMenu
     public void StartMapMenu(View view) {
-        Intent displayMap = new Intent(PassangerHomeActivity.this, PassangerMapActivity.class);
+        Intent displayMap = new Intent(PassangerHomeActivity.this, PassangerBusSelectActivity.class);
         startActivity(displayMap);
     }
 }

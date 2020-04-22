@@ -46,7 +46,7 @@ public class PassangerLoginActivity extends AppCompatActivity {
 
         if(fAuth.getCurrentUser()!=null){
             Toast.makeText(PassangerLoginActivity.this, "welcome back", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(getApplicationContext(), PassangerBusSelectActivity.class));
+            startActivity(new Intent(getApplicationContext(), PassangerHomeActivity.class));
             finish();
 
 
@@ -84,7 +84,7 @@ public class PassangerLoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(PassangerLoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(),PassangerBusSelectActivity.class));
+                            startActivity(new Intent(getApplicationContext(),PassangerHomeActivity.class));
                             finish();
                         }else {
                             Toast.makeText(PassangerLoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();

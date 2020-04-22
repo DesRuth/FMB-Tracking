@@ -52,7 +52,7 @@ public class DialogCreateBus extends DialogFragment {
             public void onClick(View v) {
                 Log.d(TAG, "onClick: capturing input");
                 String input = mInput.getText().toString();
-                    mOnInputListner.sendInput("Successfully added a bus");
+
 
                 Buses buses = new Buses();
                 buses.setBusNo(input);
@@ -69,6 +69,7 @@ public class DialogCreateBus extends DialogFragment {
                             Log.w(TAG, "Error writing document", e);
                         }
                     });
+                mOnInputListner.sendInput("Successfully added a bus");
                     getDialog().dismiss();
             }
         });

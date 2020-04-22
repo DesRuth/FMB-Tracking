@@ -16,14 +16,16 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.pkvv.fmb_tracking.Fragments.DialogAssignDriver;
 import com.pkvv.fmb_tracking.Fragments.DialogCreateBus;
+import com.pkvv.fmb_tracking.Fragments.DialogDeleteBus;
 import com.pkvv.fmb_tracking.MainActivity;
 import com.pkvv.fmb_tracking.R;
 
 import java.util.ArrayList;
 
-public class AdminHomeActivity extends AppCompatActivity implements DialogCreateBus.OnInputListner {
-    private Button mOpenDialog;
+public class AdminHomeActivity extends AppCompatActivity implements DialogCreateBus.OnInputListner ,DialogAssignDriver.OnInputListner2, DialogDeleteBus.OnInputListner3 {
+    private Button mOpenDialog,mopenDialog2,getmOpenDialog3;
     public  String busNo;
     public static final String TAG ="AdminHomeActivity";
 
@@ -32,6 +34,18 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
         Log.d(TAG, "sendInput: got the input"+input);
         Toast.makeText(this,input,Toast.LENGTH_SHORT).show();
     }
+    @Override
+    public void sendInput2(String input) {
+        Log.d(TAG, "sendInput: got the input2"+input);
+        Toast.makeText(this,input,Toast.LENGTH_SHORT).show();
+    }
+    @Override
+    public void sendInput3(String input) {
+        Log.d(TAG, "sendInput: got the input3"+input);
+        Toast.makeText(this,input,Toast.LENGTH_SHORT).show();
+    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +53,8 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
         setContentView(R.layout.activity_admin_home);
 
         mOpenDialog =findViewById(R.id.open_dialog);
+        mopenDialog2=findViewById(R.id.open_dialog2);
+        getmOpenDialog3=findViewById(R.id.open_dialog3);
         mOpenDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,6 +64,24 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
                 
             }
         });
+
+        mopenDialog2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick:openong2 ");
+                DialogAssignDriver dialogAssignDriver =new DialogAssignDriver();
+                dialogAssignDriver.show(getSupportFragmentManager(),"DialogAssignDriver");
+            }
+        });
+        getmOpenDialog3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick:openong3 ");
+                DialogDeleteBus dialogDeleteBus =new DialogDeleteBus();
+                dialogDeleteBus.show(getSupportFragmentManager(),"DialogDeleteBus");
+            }
+        });
+
 
     }
 
@@ -70,6 +104,7 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
         }
         return super.onOptionsItemSelected(item);
     }
+
 
 
 }

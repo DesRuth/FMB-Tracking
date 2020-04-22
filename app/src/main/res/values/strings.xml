@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">FMB-Tracking</string>
+    <string name="spinner_driver_assign">select driver</string>
 
     <!-- Firestore Strings -->
     <string name="collection_users">Users</string>

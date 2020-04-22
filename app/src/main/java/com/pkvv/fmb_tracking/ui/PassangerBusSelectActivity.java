@@ -36,7 +36,8 @@ public class PassangerBusSelectActivity extends AppCompatActivity {
     public static final String TAG = "BusesList";
     EditText etxt;
     List<Buses> Listbuses=new ArrayList<>();
-    int pos =0;
+    int pos = 0;
+    int flag = 1;
 
 
 
@@ -71,28 +72,29 @@ public class PassangerBusSelectActivity extends AppCompatActivity {
 
     public void getData(View view){
 
-        String busn = etxt.getText().toString().trim();
-//        for(int i=0 ; i<Listbuses.size();i++ ){
-//            if(busn == Listbuses.get(i).getBusNo().toString()){
-//                Log.d(TAG, "getData: entered num"+busn);
-//                Log.d(TAG, "getData: num in list"+Listbuses.get(i).getBusNo());
-//                pos = i;
-//                break;
-//            }
-//        }
-
-       pos =Integer.parseInt(busn)-1;
-
-        if (pos >= Listbuses.size()) {
-           etxt.setError("please enter a valid bus number");
-           return;
+        String busn = etxt.getText().toString();
+try {
+    for (int j = 0; j <= Listbuses.size(); j++) {
+        if (busn.equals(Listbuses.get(j).getBusNo())) {
+            pos = j;
+            flag = 0;
+            break;
         }
+        Log.d(TAG, "getData: loope" + j);
+    }
+}
+catch (IndexOutOfBoundsException e){
+    Toast.makeText(this,"Enter a valid bus number",Toast.LENGTH_SHORT).show();
+}
 
 
 
-        Intent intent =new Intent(PassangerBusSelectActivity.this,PassangerMapActivity.class);
-        intent.putExtra("key_identify",Listbuses.get(pos).getUser_id());
-        startActivity(intent);
+
+            if(flag == 0) {
+                Intent intent = new Intent(PassangerBusSelectActivity.this, PassangerMapActivity.class);
+                intent.putExtra("key_identify", Listbuses.get(pos).getUser_id());
+                startActivity(intent);
+            }
 
 
     }
