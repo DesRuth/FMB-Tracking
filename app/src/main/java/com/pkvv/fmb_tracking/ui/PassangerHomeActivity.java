@@ -15,10 +15,12 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -33,6 +35,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.pkvv.fmb_tracking.Fragments.DialogPassangerBusSelect;
 import com.pkvv.fmb_tracking.R;
 import com.pkvv.fmb_tracking.models.User;
 import com.pkvv.fmb_tracking.models.UserLocation;
@@ -41,13 +44,21 @@ import static com.pkvv.fmb_tracking.Constants.ERROR_DIALOG_REQUEST;
 import static com.pkvv.fmb_tracking.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static com.pkvv.fmb_tracking.Constants.PERMISSIONS_REQUEST_ENABLE_GPS;
 
-public class PassangerHomeActivity extends AppCompatActivity {
+public class PassangerHomeActivity extends AppCompatActivity implements DialogPassangerBusSelect.OnInputListnerPass1 {
+    public static final String TAG ="PassangerHomeActivity";
 
     FirebaseAuth fAuth;
     private boolean mLocationPermissionGranted = false;
     private FusedLocationProviderClient mFusedLocationClient;
     private UserLocation mUserLocation;
     private FirebaseFirestore mdb;
+    private Button mOpenDialogPass1;
+
+    @Override
+    public void sendInputPass1(String input) {
+        Log.d(TAG, "sendInput: got the input"+input);
+        Toast.makeText(this,input,Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +69,15 @@ public class PassangerHomeActivity extends AppCompatActivity {
 
         fAuth = FirebaseAuth.getInstance();
         mdb = FirebaseFirestore.getInstance();
+        mOpenDialogPass1 = findViewById(R.id.open_dialog_pass1);
+        mOpenDialogPass1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick:openong3 ");
+                DialogPassangerBusSelect dialogPassangerBusSelect =new DialogPassangerBusSelect();
+                dialogPassangerBusSelect.show(getSupportFragmentManager(),"DialogPassangerBusSelect");
+            }
+        });
     }
 
 
@@ -207,10 +227,7 @@ public class PassangerHomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //MapMenu
-    public void StartMapMenu(View view) {
-        Intent displayMap = new Intent(PassangerHomeActivity.this, PassangerBusSelectActivity.class);
-        startActivity(displayMap);
-    }
+
+
 }
 

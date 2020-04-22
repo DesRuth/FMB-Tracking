@@ -29,6 +29,7 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
     public  String busNo;
     public static final String TAG ="AdminHomeActivity";
 
+
     @Override
     public void sendInput(String input) {
         Log.d(TAG, "sendInput: got the input"+input);
