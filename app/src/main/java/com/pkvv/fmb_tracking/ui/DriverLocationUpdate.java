@@ -50,15 +50,13 @@ public class DriverLocationUpdate extends AppCompatActivity {
 
 
 
+
         btnStartService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startService();
             }
         });
-
-
-
 
 
 

@@ -13,6 +13,41 @@
 
     <!--google maps!-->
     <string name="Google_Maps_Api_Key">AIzaSyDNFpAIhSeH62DaDBVemYXjffCRdyC5Rug</string>
+
+    <!--notice!-->
+    <!-- Dialog/Fragment names -->
+    <string name="new_notice">New Notice </string>
+    <string name="view_notice">Notice Dialog</string>
+
+    <!-- Strings -->
+    <string name="notice_title">Title</string>
+    <string name="notice_content">Content</string>
+    
+    
+    <!--try !-->
+    <string-array name="title">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="description">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="date">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    
     
     
 

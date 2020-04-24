@@ -96,7 +96,6 @@ public class DialogPassangerBusSelect extends DialogFragment {
                     getDialog().dismiss();
                 }
 
-
             }
         });
         return view;

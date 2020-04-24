@@ -1,44 +1,53 @@
 package com.pkvv.fmb_tracking.ui;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
+
+import com.google.firebase.firestore.Query;
+
 import com.pkvv.fmb_tracking.Fragments.DialogPassangerBusSelect;
+import com.pkvv.fmb_tracking.MainActivity;
 import com.pkvv.fmb_tracking.R;
-import com.pkvv.fmb_tracking.models.User;
+import com.pkvv.fmb_tracking.models.Notice;
 import com.pkvv.fmb_tracking.models.UserLocation;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.pkvv.fmb_tracking.Constants.ERROR_DIALOG_REQUEST;
 import static com.pkvv.fmb_tracking.Constants.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
@@ -53,6 +62,18 @@ public class PassangerHomeActivity extends AppCompatActivity implements DialogPa
     private UserLocation mUserLocation;
     private FirebaseFirestore mdb;
     private Button mOpenDialogPass1;
+    private List<Notice>  listNotice= new ArrayList<Notice>();
+    private List<String>  s1 = new ArrayList<String>();
+    private List<String>  s2 = new ArrayList<String>();
+    private List<String>  date = new ArrayList<String>();
+    private RecyclerView recyclerView;
+    private String titleA[],contentA[];
+    private String dateA[];
+    private FirestoreRecyclerAdapter adapter;
+
+
+
+
 
     @Override
     public void sendInputPass1(String input) {
@@ -70,21 +91,47 @@ public class PassangerHomeActivity extends AppCompatActivity implements DialogPa
         fAuth = FirebaseAuth.getInstance();
         mdb = FirebaseFirestore.getInstance();
         mOpenDialogPass1 = findViewById(R.id.open_dialog_pass1);
+        recyclerView =findViewById(R.id.recyclerView);
+
+        Query query = mdb.collection("Notice");
+        FirestoreRecyclerOptions<Notice> options = new FirestoreRecyclerOptions.Builder<Notice>().setQuery(query,Notice.class)
+                .build();
+        adapter = new FirestoreRecyclerAdapter<Notice, NoticeViewHolder>(options) {
+            @NonNull
+            @Override
+            public NoticeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.my_row,parent,false);
+                return new NoticeViewHolder(view);
+
+            }
+
+            @Override
+            protected void onBindViewHolder(@NonNull NoticeViewHolder holder, int position, @NonNull Notice model) {
+            holder.LTitle.setText(model.getTitle());
+            holder.LContent.setText(model.getContent());
+            holder.LDate.setText(model.getTimestamp().toString());
+            }
+        };
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
+
+
+
         mOpenDialogPass1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick:openong3 ");
                 DialogPassangerBusSelect dialogPassangerBusSelect =new DialogPassangerBusSelect();
                 dialogPassangerBusSelect.show(getSupportFragmentManager(),"DialogPassangerBusSelect");
+
+
+
             }
         });
     }
-
-
-
-
-
-
 
     //start
     private boolean checkMapServices() {
@@ -220,14 +267,36 @@ public class PassangerHomeActivity extends AppCompatActivity implements DialogPa
         switch (item.getItemId()) {
             case R.id.logoutMenu:
                 FirebaseAuth.getInstance().signOut();//logout
-                startActivity(new Intent(getApplicationContext(), PassangerLoginActivity.class));
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
-                return true;
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
 
+    private class NoticeViewHolder extends RecyclerView.ViewHolder {
+        private TextView LTitle;
+        private TextView LContent;
+        private TextView LDate;
+        public NoticeViewHolder(@NonNull View itemView) {
+            super(itemView);
+            LTitle = itemView.findViewById(R.id.title_recy);
+            LContent = itemView.findViewById(R.id.content_recy);
+            LDate = itemView.findViewById(R.id.date_recy);
+        }
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        adapter.startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        adapter.stopListening();
+    }
 }
 

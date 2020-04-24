@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -31,6 +32,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -45,7 +48,9 @@ import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PendingResult;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.internal.PolylineEncoding;
 import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
 import com.pkvv.fmb_tracking.R;
 import com.pkvv.fmb_tracking.models.Buses;
 import com.pkvv.fmb_tracking.models.CluserMarker;
@@ -56,8 +61,9 @@ import com.pkvv.fmb_tracking.models.UserLocation;
 import com.pkvv.fmb_tracking.util.MyClusterManagerRenderer;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class PassangerMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+public class PassangerMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener , GoogleMap.OnPolylineClickListener {
     MapView mapPassView;
     public static final String TAG = "Busesshow";
    private  GeoApiContext mGeoApiContext = null;
@@ -126,20 +132,51 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
     }
 
-    private void calculateDirections(){
+    private void addPolylinesToMap(final DirectionsResult result){
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run: result routes: " + result.routes.length);
+
+                for(DirectionsRoute route: result.routes){
+                    Log.d(TAG, "run: leg: " + route.legs[0].toString());
+                    List<com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
+
+                    List<LatLng> newDecodedPath = new ArrayList<>();
+
+                    // This loops through all the LatLng coordinates of ONE polyline.
+                    for(com.google.maps.model.LatLng latLng: decodedPath){
+
+//                        Log.d(TAG, "run: latlng: " + latLng.toString());
+
+                        newDecodedPath.add(new LatLng(
+                                latLng.lat,
+                                latLng.lng
+                        ));
+                    }
+                    Polyline polyline = mGoogleMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
+                    polyline.setColor(ContextCompat.getColor(getApplicationContext(), R.color.darkGrey));
+                    polyline.setClickable(true);
+
+                }
+            }
+        });
+    }
+
+    private void calculateDirections(DriverCurrentLocation updatedLoc){
         Log.d(TAG, "calculateDirections: calculating directions.");
 
         com.google.maps.model.LatLng destination = new com.google.maps.model.LatLng(
-                15.8203428,
-                74.4964214
+                geoloc.getLatitude(),
+                geoloc.getLongitude()
         );
         DirectionsApiRequest directions = new DirectionsApiRequest(mGeoApiContext);
 
         directions.alternatives(true);
         directions.origin(
                 new com.google.maps.model.LatLng(
-                        15.8403428,
-                        74.4864214
+                        updatedLoc.getGeo_point().getLatitude(),
+                        updatedLoc.getGeo_point().getLongitude()
                 )
         );
         Log.d(TAG, "calculateDirections: destination: " + destination.toString());
@@ -150,6 +187,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                 Log.d(TAG, "calculateDirections: duration: " + result.routes[0].legs[0].duration);
                 Log.d(TAG, "calculateDirections: distance: " + result.routes[0].legs[0].distance);
                 Log.d(TAG, "calculateDirections: geocodedWayPoints: " + result.geocodedWaypoints[0].toString());
+                addPolylinesToMap(result);
             }
 
             @Override
@@ -221,6 +259,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
                                     mClusterMarker.get(1).setPosition(updatedLatLng);
                                         mClusterManagerRenderer.setUpdateMarker(mClusterMarker.get(1));
+                                    calculateDirections(updatedDriverLocation);
 
                                 } catch (NullPointerException e) {
                                     Log.e(TAG, "retrieveUserLocations: NullPointerException: " + e.getMessage());
@@ -236,7 +275,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         }
 
 
-        calculateDirections();
+
 
     }
 
@@ -454,6 +493,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
         //map.setMyLocationEnabled(true);
         mGoogleMap=map;
+        mGoogleMap.setOnPolylineClickListener(this);
 
         settingMarkerwithDelay();
 
@@ -514,5 +554,11 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
             final AlertDialog alert = builder.create();
             alert.show();
         }
+    }
+
+    @Override
+    public void onPolylineClick(Polyline polyline) {
+polyline.setColor(ContextCompat.getColor(getApplicationContext(),R.color.blue1));
+polyline.setZIndex(1);
     }
 }

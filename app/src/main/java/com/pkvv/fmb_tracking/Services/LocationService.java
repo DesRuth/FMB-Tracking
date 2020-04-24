@@ -148,6 +148,10 @@ public class LocationService extends Service {
 
     }
 
+    public void deleteService(){
+        stopSelf();
+    }
+
 
 
 

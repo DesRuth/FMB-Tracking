@@ -15,19 +15,30 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.pkvv.fmb_tracking.Fragments.DialogAddNotice;
 import com.pkvv.fmb_tracking.Fragments.DialogAssignDriver;
 import com.pkvv.fmb_tracking.Fragments.DialogCreateBus;
 import com.pkvv.fmb_tracking.Fragments.DialogDeleteBus;
+import com.pkvv.fmb_tracking.IAdminHomeActivity;
 import com.pkvv.fmb_tracking.MainActivity;
 import com.pkvv.fmb_tracking.R;
+import com.pkvv.fmb_tracking.models.Notice;
 
 import java.util.ArrayList;
 
-public class AdminHomeActivity extends AppCompatActivity implements DialogCreateBus.OnInputListner ,DialogAssignDriver.OnInputListner2, DialogDeleteBus.OnInputListner3 {
-    private Button mOpenDialog,mopenDialog2,getmOpenDialog3;
+public class AdminHomeActivity extends AppCompatActivity implements DialogCreateBus.OnInputListner ,DialogAssignDriver.OnInputListner2, DialogDeleteBus.OnInputListner3, IAdminHomeActivity {
+    private Button mOpenDialog,mopenDialog2,mOpenDialog3,mSendNoticeDialog;
     public  String busNo;
     public static final String TAG ="AdminHomeActivity";
+    private View mParentLayout;
 
 
     @Override
@@ -45,6 +56,30 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
         Log.d(TAG, "sendInput: got the input3"+input);
         Toast.makeText(this,input,Toast.LENGTH_SHORT).show();
     }
+    @Override
+    public void createNewNotice(String title, String content) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference newNoticeRef =db.collection("Notice").document();
+        Notice notice = new Notice();
+        notice.setTitle(title);
+        notice.setContent(content);
+        notice.setNote_id(newNoticeRef.getId());
+
+        newNoticeRef.set(notice).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                      Toast.makeText(getApplicationContext(),"Sucessfully Notice has been Sent",Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"Failed to send Notice",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        });
+
+    }
+
 
 
 
@@ -55,7 +90,8 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
 
         mOpenDialog =findViewById(R.id.open_dialog);
         mopenDialog2=findViewById(R.id.open_dialog2);
-        getmOpenDialog3=findViewById(R.id.open_dialog3);
+        mOpenDialog3=findViewById(R.id.open_dialog3);
+        mSendNoticeDialog =findViewById(R.id.AddANoticeDialog);
         mOpenDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,7 +110,7 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
                 dialogAssignDriver.show(getSupportFragmentManager(),"DialogAssignDriver");
             }
         });
-        getmOpenDialog3.setOnClickListener(new View.OnClickListener() {
+        mOpenDialog3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick:openong3 ");
@@ -83,7 +119,13 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
             }
         });
 
-
+mSendNoticeDialog.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        DialogAddNotice dialog = new DialogAddNotice();
+        dialog.show(getSupportFragmentManager(), "DialogNewNotice");
+    }
+});
     }
 
 
@@ -107,5 +149,20 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
     }
 
 
-
+    public void clear_Notice(View view) {
+        FirebaseFirestore fStore = FirebaseFirestore.getInstance();
+        fStore.collection("Notice").document().delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error deleting document", e);
+                    }
+                });
+    }
 }
