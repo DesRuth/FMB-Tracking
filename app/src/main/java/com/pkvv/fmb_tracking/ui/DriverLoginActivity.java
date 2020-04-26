@@ -33,13 +33,11 @@ import com.pkvv.fmb_tracking.models.Drivers;
 import com.pkvv.fmb_tracking.models.User;
 
 public class DriverLoginActivity extends AppCompatActivity {
-    EditText mEmail,mPassword,mDriverKey;
+    EditText mEmail,mPassword;
     Button mLoginBtn;
     TextView mCreateBtn,forgotTextLink;
     ProgressBar progressBar;
     FirebaseAuth fAuth;
-
-    String Dkey ="1234";
     private static final String TAG ="DriverLoginActivity";
 
 
@@ -57,7 +55,7 @@ public class DriverLoginActivity extends AppCompatActivity {
         mLoginBtn = findViewById(R.id.loginBtn);
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
-        mDriverKey = findViewById(R.id.DriverKey);
+
 
 
         if(fAuth.getCurrentUser()!=null){
@@ -76,7 +74,7 @@ public class DriverLoginActivity extends AppCompatActivity {
 
                 String email = mEmail.getText().toString().trim();
                 String password = mPassword.getText().toString().trim();
-                String UniqueDriverKey = mDriverKey.getText().toString().trim();
+
 
 
                 if(TextUtils.isEmpty(email)){
@@ -94,12 +92,7 @@ public class DriverLoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                Log.d(TAG, "onClick:"+Dkey);
-                Log.d(TAG, "onClick:"+UniqueDriverKey);
-                if(!UniqueDriverKey.equals(Dkey)){
-                    mDriverKey.setError("Unique Driver key did not match");
-                    return;
-                }
+
 
                 progressBar.setVisibility(View.VISIBLE);
 

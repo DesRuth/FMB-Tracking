@@ -2,6 +2,7 @@ package com.pkvv.fmb_tracking.ui;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,24 +22,32 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.pkvv.fmb_tracking.Fragments.DialogAddNotice;
 import com.pkvv.fmb_tracking.Fragments.DialogAssignDriver;
 import com.pkvv.fmb_tracking.Fragments.DialogCreateBus;
 import com.pkvv.fmb_tracking.Fragments.DialogDeleteBus;
+import com.pkvv.fmb_tracking.Fragments.FragmentTimeTableCreate;
 import com.pkvv.fmb_tracking.IAdminHomeActivity;
 import com.pkvv.fmb_tracking.MainActivity;
 import com.pkvv.fmb_tracking.R;
 import com.pkvv.fmb_tracking.models.Notice;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AdminHomeActivity extends AppCompatActivity implements DialogCreateBus.OnInputListner ,DialogAssignDriver.OnInputListner2, DialogDeleteBus.OnInputListner3, IAdminHomeActivity {
     private Button mOpenDialog,mopenDialog2,mOpenDialog3,mSendNoticeDialog;
+    private Button mTTCreate;
     public  String busNo;
     public static final String TAG ="AdminHomeActivity";
-    private View mParentLayout;
+    String str = "";
+
 
 
     @Override
@@ -92,6 +101,14 @@ public class AdminHomeActivity extends AppCompatActivity implements DialogCreate
         mopenDialog2=findViewById(R.id.open_dialog2);
         mOpenDialog3=findViewById(R.id.open_dialog3);
         mSendNoticeDialog =findViewById(R.id.AddANoticeDialog);
+        mTTCreate = findViewById(R.id.TTCreate);
+        mTTCreate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager f1 = getSupportFragmentManager();
+                f1.beginTransaction().replace(R.id.AdminTT,new FragmentTimeTableCreate()).addToBackStack(null).commit();
+            }
+        });
         mOpenDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,8 +143,9 @@ mSendNoticeDialog.setOnClickListener(new View.OnClickListener() {
         dialog.show(getSupportFragmentManager(), "DialogNewNotice");
     }
 });
-    }
 
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -150,19 +168,21 @@ mSendNoticeDialog.setOnClickListener(new View.OnClickListener() {
 
 
     public void clear_Notice(View view) {
-        FirebaseFirestore fStore = FirebaseFirestore.getInstance();
-        fStore.collection("Notice").document().delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+        FirebaseFirestore.getInstance().collection("Notice")
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error deleting document", e);
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
+                        List<DocumentSnapshot> snapshotList = queryDocumentSnapshots.getDocuments();
+                        for (DocumentSnapshot snapshot:snapshotList){
+                        batch.delete(snapshot.getReference());
+                        batch.commit();
+                        }
                     }
                 });
+
     }
+
+
 }

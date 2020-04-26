@@ -1,10 +1,10 @@
 package com.pkvv.fmb_tracking.ui;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,10 +41,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import com.pkvv.fmb_tracking.Fragments.DialogPassangerBusSelect;
+import com.pkvv.fmb_tracking.Fragments.FragmentTimeTableView;
 import com.pkvv.fmb_tracking.MainActivity;
 import com.pkvv.fmb_tracking.R;
 import com.pkvv.fmb_tracking.models.Notice;
-import com.pkvv.fmb_tracking.models.UserLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,16 +59,12 @@ public class PassangerHomeActivity extends AppCompatActivity implements DialogPa
     FirebaseAuth fAuth;
     private boolean mLocationPermissionGranted = false;
     private FusedLocationProviderClient mFusedLocationClient;
-    private UserLocation mUserLocation;
+
     private FirebaseFirestore mdb;
     private Button mOpenDialogPass1;
-    private List<Notice>  listNotice= new ArrayList<Notice>();
-    private List<String>  s1 = new ArrayList<String>();
-    private List<String>  s2 = new ArrayList<String>();
-    private List<String>  date = new ArrayList<String>();
+
     private RecyclerView recyclerView;
-    private String titleA[],contentA[];
-    private String dateA[];
+
     private FirestoreRecyclerAdapter adapter;
 
 
@@ -272,6 +268,11 @@ public class PassangerHomeActivity extends AppCompatActivity implements DialogPa
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void ViewTimeTable(View view) {
+        FragmentManager f2 = getSupportFragmentManager();
+        f2.beginTransaction().replace(R.id.passangerTT,new FragmentTimeTableView()).addToBackStack(null).commit();
     }
 
 

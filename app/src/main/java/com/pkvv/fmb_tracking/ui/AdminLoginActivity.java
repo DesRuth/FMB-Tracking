@@ -30,13 +30,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.pkvv.fmb_tracking.R;
 
 public class AdminLoginActivity extends AppCompatActivity {
-    EditText mEmail,mPassword,mAdminKey;
+    EditText mEmail,mPassword;
     Button mLoginBtn;
     TextView mCreateBtn,forgotTextLink;
     ProgressBar progressBar;
     FirebaseAuth fAuth;
 
-    String Akey="1234";
+
     private static final String TAG ="AdminLoginActivity";
 
 
@@ -54,7 +54,7 @@ public class AdminLoginActivity extends AppCompatActivity {
         mLoginBtn = findViewById(R.id.loginBtn);
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
-        mAdminKey = findViewById(R.id.AdminKey);
+
 
         if(fAuth.getCurrentUser()!=null){
             Toast.makeText(AdminLoginActivity.this, "welcome back", Toast.LENGTH_SHORT).show();
@@ -72,7 +72,7 @@ public class AdminLoginActivity extends AppCompatActivity {
 
                         String email = mEmail.getText().toString().trim();
                         String password = mPassword.getText().toString().trim();
-                        String UniqueAdminKey = mAdminKey.getText().toString().trim();
+
 
                         if (TextUtils.isEmpty(email)) {
                             mEmail.setError("Email is Required.");
@@ -88,13 +88,7 @@ public class AdminLoginActivity extends AppCompatActivity {
                             mPassword.setError("Password Must be >= 6 Characters");
                             return;
                         }
-                Log.d(TAG, "onClick:Dkey"+Akey);
-                Log.d(TAG, "onClick:Unique"+UniqueAdminKey);
 
-                        if(!UniqueAdminKey.equals(Akey)){
-                            mAdminKey.setError("Unique Admin key did not match");
-                            return;
-                        }
 
                         progressBar.setVisibility(View.VISIBLE);
 

@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.PassangerHomeActivity"
-    android:background="@drawable/walpaper">
+    android:background="@drawable/walpaper"
+    android:id="@+id/passangerTT">
 
     <Button
         android:id="@+id/open_dialog_pass1"
@@ -18,7 +19,20 @@
         app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.651"></Button>
+        app:layout_constraintVertical_bias="0.607"></Button>
+
+    <Button
+       android:onClick="ViewTimeTable"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/aclonica"
+        android:text="TimeTable"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.71"></Button>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

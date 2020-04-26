@@ -1,7 +1,6 @@
 package com.pkvv.fmb_tracking.ui;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -11,13 +10,12 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.util.Log;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -31,18 +29,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
@@ -52,25 +46,22 @@ import com.google.maps.internal.PolylineEncoding;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.pkvv.fmb_tracking.R;
-import com.pkvv.fmb_tracking.models.Buses;
 import com.pkvv.fmb_tracking.models.CluserMarker;
 import com.pkvv.fmb_tracking.models.DriverCurrentLocation;
-import com.pkvv.fmb_tracking.models.DriverLocation;
-import com.pkvv.fmb_tracking.models.User;
-import com.pkvv.fmb_tracking.models.UserLocation;
+import com.pkvv.fmb_tracking.models.PolylineData;
 import com.pkvv.fmb_tracking.util.MyClusterManagerRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PassangerMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener , GoogleMap.OnPolylineClickListener {
+public class PassangerMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnPolylineClickListener {
     MapView mapPassView;
     public static final String TAG = "Busesshow";
    private  GeoApiContext mGeoApiContext = null;
    private FirebaseFirestore mdb;
    private FirebaseAuth fAuth;
-    private DriverLocation mDriverPosition;
-    private UserLocation mUserPosition;
+
+
     private GoogleMap mGoogleMap;
     private LatLngBounds mMapBoundary;
     private int i=0;
@@ -79,6 +70,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     private MyClusterManagerRenderer mClusterManagerRenderer;
     private ArrayList<CluserMarker> mClusterMarker = new ArrayList<>();
     String st;
+    private TextView TexDistance,TexDutarion;
 
     //extra
     private FusedLocationProviderClient mFusedLocationClient;
@@ -94,11 +86,9 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     private Runnable r;
     private DriverCurrentLocation mdcl;
 
+    private ArrayList<PolylineData> mPolyLinesData = new ArrayList<>();
+
     //extra
-
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,18 +97,10 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
         mdb = FirebaseFirestore.getInstance();
         fAuth = FirebaseAuth.getInstance();
-
-
-
-
         mapPassView = findViewById(R.id.mapPassangerView);
+        TexDistance =findViewById(R.id.Tdistance);
+        TexDutarion=findViewById(R.id.Tduration);
         initGoogleMap(savedInstanceState);
-
-
-        mUserPosition = new UserLocation();
-        mDriverPosition = new DriverLocation();
-
-
         st =(String) getIntent().getStringExtra("key_identify");
       //  getDriverLoc(st);
        // getUserLoc();
@@ -129,7 +111,23 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
 
 
         //extra
+    }
+    public void zoomRoute(List<LatLng> lstLatLngRoute) {
 
+        if (mGoogleMap == null || lstLatLngRoute == null || lstLatLngRoute.isEmpty()) return;
+
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        for (LatLng latLngPoint : lstLatLngRoute)
+            boundsBuilder.include(latLngPoint);
+
+        int routePadding = 120;
+        LatLngBounds latLngBounds = boundsBuilder.build();
+
+        mGoogleMap.animateCamera(
+                CameraUpdateFactory.newLatLngBounds(latLngBounds, routePadding),
+                600,
+                null
+        );
     }
 
     private void addPolylinesToMap(final DirectionsResult result){
@@ -137,6 +135,14 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
             @Override
             public void run() {
                 Log.d(TAG, "run: result routes: " + result.routes.length);
+                if(mPolyLinesData.size()>0){
+                    for(PolylineData polylineData:mPolyLinesData){
+                        polylineData.getPolyline().remove();
+                    }
+                    mPolyLinesData.clear();
+                    mPolyLinesData = new ArrayList<>();
+
+                }
 
                 for(DirectionsRoute route: result.routes){
                     Log.d(TAG, "run: leg: " + route.legs[0].toString());
@@ -155,8 +161,13 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                         ));
                     }
                     Polyline polyline = mGoogleMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
-                    polyline.setColor(ContextCompat.getColor(getApplicationContext(), R.color.darkGrey));
+                    polyline.setColor(ContextCompat.getColor(getApplicationContext(), R.color.green1));
                     polyline.setClickable(true);
+                    mPolyLinesData.add(new PolylineData(polyline,route.legs[0]));
+                    zoomRoute(polyline.getPoints());
+
+
+
 
                 }
             }
@@ -172,7 +183,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
         );
         DirectionsApiRequest directions = new DirectionsApiRequest(mGeoApiContext);
 
-        directions.alternatives(true);
+        directions.alternatives(false);
         directions.origin(
                 new com.google.maps.model.LatLng(
                         updatedLoc.getGeo_point().getLatitude(),
@@ -187,7 +198,10 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                 Log.d(TAG, "calculateDirections: duration: " + result.routes[0].legs[0].duration);
                 Log.d(TAG, "calculateDirections: distance: " + result.routes[0].legs[0].distance);
                 Log.d(TAG, "calculateDirections: geocodedWayPoints: " + result.geocodedWaypoints[0].toString());
+                TexDistance.setText(result.routes[0].legs[0].distance.toString());
+                TexDutarion.setText(result.routes[0].legs[0].duration.toString());
                 addPolylinesToMap(result);
+
             }
 
             @Override
@@ -359,7 +373,7 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
                 );
                 mClusterManager.setRenderer(mClusterManagerRenderer);
             }
-            mGoogleMap.setOnInfoWindowClickListener(PassangerMapActivity.this);
+
             forUSerLocationMarker();
             forDriverLocationMarker();
 
@@ -531,34 +545,21 @@ public class PassangerMapActivity extends AppCompatActivity implements OnMapRead
     }
 
 
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        if(marker.getSnippet().equals("This is you")){
-            marker.hideInfoWindow();
-        }
-        else{
 
-            final AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-            builder.setMessage(marker.getSnippet())
-                    .setCancelable(true)
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                            dialog.cancel();
-                        }
-                    });
-            final AlertDialog alert = builder.create();
-            alert.show();
-        }
-    }
 
     @Override
     public void onPolylineClick(Polyline polyline) {
-polyline.setColor(ContextCompat.getColor(getApplicationContext(),R.color.blue1));
-polyline.setZIndex(1);
+
+        for(PolylineData polylineData: mPolyLinesData){
+            Log.d(TAG, "onPolylineClick: toString: " + polylineData.toString());
+            if(polyline.getId().equals(polylineData.getPolyline().getId())){
+                polylineData.getPolyline().setColor(ContextCompat.getColor(getApplicationContext(), R.color.blue1));
+                polylineData.getPolyline().setZIndex(1);
+            }
+            else{
+                polylineData.getPolyline().setColor(ContextCompat.getColor(getApplicationContext(), R.color.darkGrey));
+                polylineData.getPolyline().setZIndex(0);
+            }
+        }
     }
 }
